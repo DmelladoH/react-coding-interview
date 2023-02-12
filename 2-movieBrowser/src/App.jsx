@@ -1,32 +1,48 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
+import { useEffect, useState } from 'react'
+import { useMovies } from './hooks/useMovies'
 import './App.css'
 
-function App() {
-  const [count, setCount] = useState(0)
+function Movies ({ movies }) {
+  return (
+    <ul className='movie-list'>
+      {
+        movies?.map((movie) => (
+          <li className='movie' key={movie.id}>
+            <h4>{movie.title}</h4>
+            <p>{movie.year}</p>
+            <img src={movie.poster} alt={movie.title} />
+          </li>
+        ))
+      }
+    </ul>
+  )
+}
+
+function App () {
+  const [search, setSearch] = useState('')
+  const { movies, searchMovies } = useMovies({ search })
+
+  const handleSubmit = (event) => {
+    event.preventDefault()
+    searchMovies()
+  }
 
   return (
-    <div className="App">
-      <div>
-        <a href="https://vitejs.dev" target="_blank">
-          <img src="/vite.svg" className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://reactjs.org" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.jsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
+    <div className='page'>
+      <header>
+        <h1>Movie Browser</h1>
+        <form onSubmit={handleSubmit}>
+          <input onChange={(e) => setSearch(e.target.value)} placeholder='Iron man, Matrix, Citizen Ken...' />
+          <button>Search</button>
+        </form>
+      </header>
+      <main>
+        {
+          movies?.length > 0
+            ? <Movies movies={movies} />
+            : <p>No movies were found 🥲</p>
+        }
+      </main>
     </div>
   )
 }
