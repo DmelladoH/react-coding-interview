@@ -10,6 +10,9 @@ export async function getMovies ({ search }) {
     const json = await response.json()
     const movies = json.Search
 
+    // We don't want to rely on the JSON names we get from the API
+    // That's why we map that variable into our own terminology.
+    // If the contract API changes we have to change these names.
     return movies?.map((movie) => ({
       id: movie.imdbID,
       title: movie.Title,

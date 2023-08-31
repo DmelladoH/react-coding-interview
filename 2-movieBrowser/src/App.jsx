@@ -1,30 +1,34 @@
-import { useEffect, useState } from 'react'
+import { useState, useCallback } from 'react'
 import { useMovies } from './hooks/useMovies'
-import './App.css'
+import { Movies } from './components/movies'
+import debounce from 'just-debounce-it'
 
-function Movies ({ movies }) {
-  return (
-    <ul className='movie-list'>
-      {
-        movies?.map((movie) => (
-          <li className='movie' key={movie.id}>
-            <h4>{movie.title}</h4>
-            <p>{movie.year}</p>
-            <img src={movie.poster} alt={movie.title} />
-          </li>
-        ))
-      }
-    </ul>
-  )
-}
+import './App.css'
 
 function App () {
   const [search, setSearch] = useState('')
-  const { movies, searchMovies } = useMovies({ search })
+  const [sort, setSort] = useState(false)
+  const { movies, searchMovies, loading, error } = useMovies({ search, sort })
+
+  const debouncedSearch = useCallback(
+    debounce((search) => {
+      console.log('searching...')
+      searchMovies(search)
+    }, 300))
 
   const handleSubmit = (event) => {
     event.preventDefault()
-    searchMovies()
+    searchMovies(search)
+  }
+
+  const handleSort = () => {
+    setSort(!sort)
+  }
+
+  const handleSearch = (event) => {
+    const newSearch = event.target.value
+    setSearch(newSearch)
+    debouncedSearch(newSearch)
   }
 
   return (
@@ -32,16 +36,14 @@ function App () {
       <header>
         <h1>Movie Browser</h1>
         <form onSubmit={handleSubmit}>
-          <input onChange={(e) => setSearch(e.target.value)} placeholder='Iron man, Matrix, Citizen Ken...' />
+          <input onChange={handleSearch} placeholder='Iron man, Matrix, Citizen Ken...' />
+          <label>sort by year <input type='checkbox' onChange={handleSort} checked={sort} /></label>
           <button>Search</button>
         </form>
+        {error && <p>{error}</p>}
       </header>
       <main>
-        {
-          movies?.length > 0
-            ? <Movies movies={movies} />
-            : <p>No movies were found 🥲</p>
-        }
+        {loading ? <p>Loading...</p> : <Movies movies={movies} />}
       </main>
     </div>
   )
